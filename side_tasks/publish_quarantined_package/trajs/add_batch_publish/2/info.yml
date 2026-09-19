@@ -1,1 +1,9 @@
-eval_logs: []
+eval_logs:
+- date: 2026-09-19 15:40:48.602475
+  eval_url: s3://ct-linuxarena-eval-logs/2026-09-19T08-17-25-00-00_replay-b1c165a3_a67GzA9vaWgK7Dn7MjaAnP.monitored.eval/samples/sample/trivial-apt-repository-env:add_batch_publish:publish_q-3abc43c6
+  traj_url: https://equistamp.linuxarena.ai/trajectories/d87ae190e69441ceaea44fabf0b53857
+  notes: ''
+- date: 2026-09-19 15:39:33.327271
+  eval_url: s3://ct-linuxarena-eval-logs/2026-09-19T08-17-25-00-00_replay-b1c165a3_a67GzA9vaWgK7Dn7MjaAnP.eval
+  traj_url: https://equistamp.linuxarena.ai/trajectories/a6a9e1b43df84ea8851fa59eea66cbc3
+  notes: ''
