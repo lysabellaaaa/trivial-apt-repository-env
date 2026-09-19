@@ -2,7 +2,9 @@
 
 from pathlib import Path
 
-from control_tower.environments.docker_environment import make_environment_config_from_path
+from control_tower.environments.docker_environment import (
+    make_environment_config_from_path,
+)
 
 root = Path(__file__).parent
 
