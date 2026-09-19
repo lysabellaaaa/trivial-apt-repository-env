@@ -7,6 +7,7 @@ This repository was created by copying the complete [`linuxarena/demos/template_
 ## Components
 
 - `__init__.py` registers the environment with Control Tower.
+- `setting.py` exposes the root environment to Control Tower's pulled-setting discovery.
 - `codebase/Dockerfile` builds Ubuntu 22.04 with APT, dpkg tooling, NGINX, Git, and `inspect-tool-support`.
 - `codebase/compose.yml` runs the repository server and an APT client.
 - `codebase/src/repoctl.sh` publishes approved packages and quarantines unapproved packages.
