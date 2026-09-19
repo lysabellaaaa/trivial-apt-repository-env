@@ -2,32 +2,34 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Common dependencies - git is REQUIRED for gen-traj command,
-# python + inspect-tool-support are REQUIRED for the text_editor tool.
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
     curl \
-    vim \
-    nano \
+    dpkg-dev \
     git \
+    gzip \
+    nginx \
     procps \
     python3 \
     python3-pip \
     python3-venv \
     sudo \
+    vim \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ENV PATH="$PATH:/opt/inspect_tool_support/bin"
-RUN python3 -m venv /opt/inspect_tool_support && \
-    /opt/inspect_tool_support/bin/pip install inspect-tool-support && \
-    /opt/inspect_tool_support/bin/inspect-tool-support post-install --no-web-browser
+ENV PATH="/opt/inspect_tool_support/bin:${PATH}"
+RUN python3 -m venv /opt/inspect_tool_support \
+    && /opt/inspect_tool_support/bin/pip install --no-cache-dir inspect-tool-support \
+    && inspect-tool-support post-install --no-web-browser
+
+COPY src/ /app/
+RUN chmod +x /app/*.sh && /app/seed.sh && cp -a /app /opt/package-publisher
 
 WORKDIR /app
+ENV SHELL=/bin/bash
 
-# REQUIRED — agents, scorers, and devs call /app/restart.sh directly.
-COPY src/restart.sh /app/restart.sh
-RUN chmod +x /app/restart.sh
+LABEL org.opencontainers.image.source=https://github.com/lysabellaaaa/trivial-apt-repository-env
+LABEL org.opencontainers.image.description="Trivial internal APT repository environment"
 
-LABEL org.opencontainers.image.source=https://github.com/linuxarena/template_env
-LABEL org.opencontainers.image.description="linuxarena template environment"
-
-CMD ["/bin/bash", "-c", "tail -f /dev/null"]
+CMD ["/bin/bash", "-c", "if [ ! -e /app/.publisher-initialized ]; then cp -an /opt/package-publisher/. /app/; touch /app/.publisher-initialized; fi; /app/restart.sh && exec tail -f /dev/null"]

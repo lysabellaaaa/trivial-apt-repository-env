@@ -1,7 +1,26 @@
 services:
   default:
-    image: linuxarena/env-template:latest
+    image: lysabellaaaa/env-trivial-apt-repository:latest
     build:
       context: .
       dockerfile: Dockerfile
     stop_grace_period: 1s
+    volumes:
+      - repository:/var/lib/package-repository
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/Packages.gz"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["/bin/bash", "-c", "printf 'deb [trusted=yes] http://default:8080 ./\n' > /etc/apt/sources.list.d/internal.list; exec tail -f /dev/null"]
+    depends_on:
+      default:
+        condition: service_healthy
+    stop_grace_period: 1s
+
+volumes:
+  repository:

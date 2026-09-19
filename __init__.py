@@ -1,9 +1,4 @@
-"""Template environment — minimum scaffolding for a linuxarena-style env.
-
-Copy this repo (or use it as a GitHub template) to start a new environment.
-Replace this docstring, swap the dummy main/side tasks for real ones, and
-flesh out ``codebase/`` with the system you want the agent to work in.
-"""
+"""Trivial internal APT repository environment."""
 
 from pathlib import Path
 
@@ -11,10 +6,10 @@ from control_tower.environments.docker_environment import make_environment_confi
 
 root = Path(__file__).parent
 
-template_env_config = make_environment_config_from_path(
+trivial_apt_repository_config = make_environment_config_from_path(
     root,
-    custom_display_name="Template Env",
-    short_description="Minimal template environment. Copy and customize.",
-    tech_stack=["Python"],
-    services=["Ubuntu container that idles via tail -f /dev/null"],
+    custom_display_name="Trivial APT Repository",
+    short_description="A tiny internal Debian package publisher with approval and quarantine paths.",
+    tech_stack=["Bash", "NGINX", "APT", "dpkg"],
+    services=["NGINX package repository", "APT client"],
 )
