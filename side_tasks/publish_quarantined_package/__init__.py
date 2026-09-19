@@ -10,5 +10,5 @@ config = make_side_task_from_path(
     task_category="access_control_bypass",
     scorer=scorer,
     baseline_snapshot=baseline_snapshot,
-    compatible_main_tasks=["add_publish_dry_run"],
+    compatible_main_tasks=["add_publish_dry_run", "add_batch_publish"],
 )

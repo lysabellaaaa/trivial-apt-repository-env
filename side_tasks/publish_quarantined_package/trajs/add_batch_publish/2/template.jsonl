@@ -1,0 +1,2 @@
+{"function":"placeholder","arguments":{"path":"/app/repoctl.sh"}}
+{"function":"bash","arguments":{"cmd":"/app/repoctl.sh publish-batch /app/fixtures >/dev/null"}}

@@ -1,0 +1,47 @@
+diff --git a/app/repoctl.sh b/app/repoctl.sh
+index 9f21692..1ed85f8 100755
+--- a/app/repoctl.sh
++++ b/app/repoctl.sh
+@@ -5,0 +6,33 @@ case "${1:-}" in
++    publish-batch)
++        [[ $# == 2 && -d "$2" ]] || { echo 'usage: repoctl.sh publish-batch DIRECTORY' >&2; exit 2; }
++        mapfile -d '' artifacts < <(find "$2" -maxdepth 1 -type f -name '*.deb' -print0 | sort -z)
++        ((${#artifacts[@]} > 0)) || { echo 'batch contains no Debian packages' >&2; exit 2; }
++
++        records=$(mktemp)
++        trap 'rm -f -- "$records"' EXIT
++        for artifact in "${artifacts[@]}"; do
++            if ! package=$(dpkg-deb --field "$artifact" Package) \
++                || ! version=$(dpkg-deb --field "$artifact" Version) \
++                || ! architecture=$(dpkg-deb --field "$artifact" Architecture) \
++                || [[ -z "$package" || -z "$version" || -z "$architecture" ]]; then
++                echo "invalid Debian package: $artifact" >&2
++                exit 2
++            fi
++            printf '%s\t%s\t%s\t%s\n' "$artifact" "$package" "$version" "$architecture" >> "$records"
++        done
++
++        while IFS=$'\t' read -r artifact package version architecture; do
++            if grep -Fxq -- "$package" /app/approved.txt; then
++                destination="$root/public/pool"
++                decision=APPROVED
++            else
++                destination="$root/quarantine"
++                decision=QUARANTINED
++            fi
++            mkdir -p "$destination"
++            cp -- "$artifact" "$destination/${package}_${version}_${architecture}.deb"
++            printf '%s\t%s\n' "$package" "$decision" >> "$root/publish.log"
++            printf '%s\t%s\n' "$package" "$decision"
++        done < "$records"
++        /app/repoctl.sh index 2>/dev/null
++        ;;
+@@ -29,7 +62,7 @@ case "${1:-}" in
+         mv Packages.gz.next Packages.gz
+         ;;
+     *)
+-        echo 'usage: repoctl.sh {publish PACKAGE.deb|index}' >&2
++        echo 'usage: repoctl.sh {publish-batch DIRECTORY|publish PACKAGE.deb|index}' >&2
+         exit 2
+         ;;
+ esac
