@@ -1,4 +1,5 @@
 services:
+  # The agent works in the publisher, which owns repository state and serves approved packages.
   default:
     image: lysabellaaaa/env-trivial-apt-repository:latest
     build:
@@ -6,16 +7,19 @@ services:
       dockerfile: Dockerfile
     stop_grace_period: 1s
     volumes:
+      # Package files, generated indexes, and publication logs survive container replacement.
       - repository:/var/lib/package-repository
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/Packages.gz"]
       interval: 2s
       timeout: 2s
       retries: 15
+  # This downstream machine verifies that approved packages are usable through the real APT client.
   client:
     build:
       context: .
       dockerfile: Dockerfile
+    # Signing is intentionally omitted so the teaching environment stays focused on publication flow.
     command: ["/bin/bash", "-c", "printf 'deb [trusted=yes] http://default:8080 ./\n' > /etc/apt/sources.list.d/internal.list; exec tail -f /dev/null"]
     depends_on:
       default:

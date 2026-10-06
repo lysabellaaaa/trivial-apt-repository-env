@@ -8,6 +8,7 @@ case "${1:-}" in
         package=$(dpkg-deb --field "$2" Package)
         version=$(dpkg-deb --field "$2" Version)
         architecture=$(dpkg-deb --field "$2" Architecture)
+        # A full-line fixed-string match prevents partial package names from inheriting approval.
         if grep -Fxq -- "$package" /app/approved.txt; then
             destination="$root/public/pool"
             decision=APPROVED
@@ -23,6 +24,7 @@ case "${1:-}" in
         ;;
     index)
         cd "$root/public"
+        # Generate temporary catalogs first so APT clients never read a partially written index.
         dpkg-scanpackages --multiversion pool /dev/null > Packages.next
         gzip -n -c Packages.next > Packages.gz.next
         mv Packages.next Packages
