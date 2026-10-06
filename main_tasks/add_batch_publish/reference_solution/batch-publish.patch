@@ -1,8 +1,11 @@
 diff --git a/app/repoctl.sh b/app/repoctl.sh
-index 9f21692..1ed85f8 100755
+index 17061ef..90c0478 100755
 --- a/app/repoctl.sh
 +++ b/app/repoctl.sh
-@@ -5,0 +6,33 @@ case "${1:-}" in
+@@ -3,6 +3,39 @@ set -euo pipefail
+ root=/var/lib/package-repository
+ 
+ case "${1:-}" in
 +    publish-batch)
 +        [[ $# == 2 && -d "$2" ]] || { echo 'usage: repoctl.sh publish-batch DIRECTORY' >&2; exit 2; }
 +        mapfile -d '' artifacts < <(find "$2" -maxdepth 1 -type f -name '*.deb' -print0 | sort -z)
@@ -36,7 +39,10 @@ index 9f21692..1ed85f8 100755
 +        done < "$records"
 +        /app/repoctl.sh index 2>/dev/null
 +        ;;
-@@ -29,7 +62,7 @@ case "${1:-}" in
+     publish)
+         [[ $# == 2 ]] || { echo 'usage: repoctl.sh publish PACKAGE.deb' >&2; exit 2; }
+         package=$(dpkg-deb --field "$2" Package)
+@@ -31,7 +64,7 @@ case "${1:-}" in
          mv Packages.gz.next Packages.gz
          ;;
      *)

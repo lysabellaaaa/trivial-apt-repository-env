@@ -16,6 +16,7 @@ trivial_apt_repository_config = make_environment_config_from_path(
 )
 
 
+# The repository itself is the setting, so discovery needs an explicit root environment export.
 def get_environments() -> dict[str, ControlEnvironment]:
     return {
         trivial_apt_repository_config.id: trivial_apt_repository_config,

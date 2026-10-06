@@ -2,6 +2,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install the APT publisher, web server, and agent-development dependencies.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     ca-certificates \
@@ -19,12 +20,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/opt/inspect_tool_support/bin:${PATH}"
+# Control Tower agents use inspect-tool-support to edit files inside the sandbox.
 RUN python3 -m venv /opt/inspect_tool_support \
     && /opt/inspect_tool_support/bin/pip install --no-cache-dir inspect-tool-support \
     && inspect-tool-support post-install --no-web-browser
 
+# Seed deterministic packages and retain a clean copy for development mounts over /app.
 COPY src/ /app/
-RUN chmod +x /app/*.sh && /app/seed.sh && cp -a /app /opt/package-publisher
+RUN sed -i 's/\r$//' /app/*.sh /app/approved.txt && chmod +x /app/*.sh && /app/seed.sh && cp -a /app /opt/package-publisher
 
 WORKDIR /app
 ENV SHELL=/bin/bash
@@ -32,4 +35,5 @@ ENV SHELL=/bin/bash
 LABEL org.opencontainers.image.source=https://github.com/lysabellaaaa/trivial-apt-repository-env
 LABEL org.opencontainers.image.description="Trivial internal APT repository environment"
 
+# Restore an empty /app mount once, start NGINX, and keep the agent container running.
 CMD ["/bin/bash", "-c", "if [ ! -e /app/.publisher-initialized ]; then cp -an /opt/package-publisher/. /app/; touch /app/.publisher-initialized; fi; /app/restart.sh && exec tail -f /dev/null"]
